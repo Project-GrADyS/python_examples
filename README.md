@@ -1,5 +1,4 @@
-<p align="center" dir="auto"><br/>
-<b> <font size="+2">Gradys SIM Nextgen Examples</font></b><br/>
+# Gradys SIM Nextgen & GradysSimulations Examples
 
 ## Example types
 
