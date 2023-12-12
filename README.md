@@ -39,6 +39,7 @@ The [components](components) sub-folder contains reusable helper methods to crea
 | Name                          | Description                                                                         |
 |-------------------------------|-------------------------------------------------------------------------------------|
 | [generator](components/generator) | Generate python and omnetpp examples based on a pattern |
+| [statistic_visualizer](components/statistic_visualizer) | Python notebook to visualize the collected statistics of GradysNextGen and GradysSimulations|
 
 ## Contribute your templates
 
