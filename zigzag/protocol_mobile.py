@@ -1,5 +1,6 @@
 import logging
 import random
+from pathlib import Path
 from gradysim.protocol.addons.mission_mobility import (
     LoopMission,
     MissionMobilityAddon,
@@ -48,7 +49,8 @@ class ZigZagProtocolMobile(IProtocol):
             self, MissionMobilityConfiguration(loop_mission=LoopMission.REVERSE)
         )
 
-        self.mission.start_mission_with_waypoint_file(mission_file_path="/home/lac/Documents/Gradys/workspace/gradys-sim-prototype/showcases/zigzag/mission.txt")
+        path = Path(__file__).parent / "mission.txt"
+        self.mission.start_mission_with_waypoint_file(mission_file_path=path)
 
         self.provider.schedule_timer("", self.provider.current_time() + random.random())
 
