@@ -1,18 +1,17 @@
 import logging
 import random
 from pathlib import Path
-from gradysim.protocol.addons.mission_mobility import (
+from gradysim.protocol.plugin.mission_mobility import (
     LoopMission,
-    MissionMobilityAddon,
+    MissionMobilityPlugin,
     MissionMobilityConfiguration,
 )
-from gradysim.protocol.addons.statistics import create_statistics, finish_statistics
+from gradysim.protocol.plugin.statistics import create_statistics, finish_statistics
 from gradysim.protocol.messages.communication import BroadcastMessageCommand, SendMessageCommand
 from gradysim.protocol.messages.telemetry import Telemetry
 from gradysim.protocol.interface import IProtocol
 from message import ZigZagMessage, ZigZagMessageType
 from utils import CommunicationStatus
-from gradysim.simulator.log import SIMULATION_LOGGER
 
 
 class ZigZagProtocolMobile(IProtocol):
@@ -31,11 +30,11 @@ class ZigZagProtocolMobile(IProtocol):
         self.current_telemetry: Telemetry
         self.last_stable_telemetry: Telemetry
        
-        self._logger = logging.getLogger(SIMULATION_LOGGER)
+        self._logger = logging.getLogger()
         self.old_mission_is_reversed: bool = False
 
     def initialize(self):
-        create_statistics(self)
+        create_statistics(self, file_name_part="python_with_visualization_5")
 
         self._logger.debug("initializing mobile protocol")
 
@@ -45,7 +44,7 @@ class ZigZagProtocolMobile(IProtocol):
         self.provider.tracked_variables["stable_data_load"] = self.current_data_load
         self.provider.tracked_variables["communication_status"] = self.communication_status.name
 
-        self.mission: MissionMobilityAddon = MissionMobilityAddon(
+        self.mission: MissionMobilityPlugin = MissionMobilityPlugin(
             self, MissionMobilityConfiguration(loop_mission=LoopMission.REVERSE)
         )
 

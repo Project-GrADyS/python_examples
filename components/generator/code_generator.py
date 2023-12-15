@@ -130,7 +130,7 @@ class CodeGenerator:
         for idx, coord in enumerate(self.sensor_coords):
             transformed_sensor_coords_to_lat_long.append((idx, coord[0], coord[1], coord[2]))
 
-        template = self.env.get_template("ini_template.jinja")
+        template = self.env.get_template("ini_template_euclidean.jinja")
 
         data = {
             # Scene orientation and groundstation

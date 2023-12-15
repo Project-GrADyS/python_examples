@@ -128,3 +128,24 @@ class AlphabetMatrix:
         self.matrix[row + 3][col + 1] = "*"
 
         self._create_coordinates_list()
+
+
+    def place_5(self, row=0, col=0):
+        for i in range(5):
+                self.matrix[i][0] = "*"
+
+        self._create_coordinates_list()
+
+    def place_15(self, row=0, col=0):
+        for i in range(5):
+            for j in range(3):
+                self.matrix[i][j] = "*"
+
+        self._create_coordinates_list()
+
+    def place_25(self, row=0, col=0):
+        for i in range(5):
+            for j in range(5):
+                self.matrix[i][j] = "*"
+
+        self._create_coordinates_list()
