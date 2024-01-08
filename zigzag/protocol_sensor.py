@@ -20,7 +20,7 @@ class ZigZagProtocolSensor(IProtocol):
     def initialize(self):
         self._logger.debug("Initializing sensor/ground protocol")
 
-        create_statistics(self, file_name_part="python_with_visualization_5")
+        create_statistics(self, file_name_part="")
 
         self.provider.tracked_variables["communication_status"] = self.communication_status.name
 

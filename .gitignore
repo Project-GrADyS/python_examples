@@ -26,6 +26,14 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+components/statistic_visualizer/exemplary_simulation_results/**
+components/statistic_visualizer/simulation_results/5/results/**
+components/statistic_visualizer/simulation_results/5/results2/**
+components/statistic_visualizer/simulation_results/15/results/**
+components/statistic_visualizer/simulation_results/15/results2/**
+components/statistic_visualizer/simulation_results/25/results/**
+components/statistic_visualizer/simulation_results/25/results2/**
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.

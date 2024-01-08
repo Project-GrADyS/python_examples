@@ -44,3 +44,14 @@ The [components](components) sub-folder contains reusable helper methods to crea
 ## Contribute your templates
 
 Contribute a example by submitting a Pull Request to the [Open Source Examples Repo](https://github.com/Project-GrADyS/examples): `https://github.com/Project-GrADyS/examples`
+
+
+
+
+Different scenarios different uav, different amount of sensors 4, 8, 16
+sensors 10, 20, 40
+
+Graphs should have One single graph for each scenario
+Average for all the runs 
+
+run only omnet 

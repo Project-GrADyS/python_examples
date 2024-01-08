@@ -34,7 +34,7 @@ class ZigZagProtocolMobile(IProtocol):
         self.old_mission_is_reversed: bool = False
 
     def initialize(self):
-        create_statistics(self, file_name_part="python_with_visualization_5")
+        create_statistics(self, file_name_part="")
 
         self._logger.debug("initializing mobile protocol")
 

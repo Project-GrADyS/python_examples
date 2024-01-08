@@ -10,7 +10,7 @@ if __name__ == "__main__":
     patterns.
     """
     code_generator = CodeGenerator(
-        protocol_location="/home/lac/Documents/Gradys/workspace/gradys-sim-prototype/showcases",
+        protocol_location="/home/lac/Documents/Gradys/examples",
         protocol="zigzag",
         protocol_ground="ZigZagProtocolSensor",
         protocol_sensor="ZigZagProtocolSensor",
@@ -18,8 +18,8 @@ if __name__ == "__main__":
         protocol_ground_filename="protocol_sensor",
         protocol_sensor_filename="protocol_sensor",
         protocol_mobile_filename="protocol_mobile",
-        pattern="Test",
-        pattern_scale=3,
+        pattern="25",
+        pattern_scale=300,
     )
 
     # # This is another example how the code generator can be used for another protocol
