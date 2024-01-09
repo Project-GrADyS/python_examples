@@ -5,7 +5,7 @@ from gradysim.protocol.messages.communication import (
 )
 from gradysim.protocol.messages.telemetry import Telemetry
 from gradysim.protocol.interface import IProtocol
-from message import ZigZagMessage, ZigZagMessageType
+from message import ZigZagMessage, ZigZagMessageType, ZigZagNodeType
 from utils import CommunicationStatus
 
 
@@ -38,6 +38,7 @@ class ZigZagProtocolSensor(IProtocol):
                 message_type=ZigZagMessageType.BEARER,
                 source_id=self.provider.get_id(),
                 destination_id=self.tentative_target,
+                source_node_type=ZigZagNodeType.SENSOR
             )
             
             self.provider.send_communication_command(
