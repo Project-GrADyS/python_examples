@@ -89,7 +89,6 @@ class ZigZagProtocolMobile(IProtocol):
                             self.old_mission_is_reversed = self.mission.is_reversed
 
                             if not self.mission.is_reversed:
-                                
                                 # Drone flying into mission direction
                                 if message.reversed_flag: 
                                     # Drone flying in reverse order of mission direction
@@ -113,7 +112,14 @@ class ZigZagProtocolMobile(IProtocol):
                                     # Drone flying in reverse order of mission direction
                                     reversed = not self.mission.is_reversed
                                     self.mission.set_reversed(reversed)
-                            
+
+                            if self.mission.is_reversed:
+                                self.stable_data_load += message.data_length
+                                self.current_data_load += message.data_length
+                            else:
+                                self.stable_data_load = 0
+                                self.current_data_load = 0
+
                             self.communication_status = CommunicationStatus.PAIRED_FINISHED
                             self._send_message()
 
