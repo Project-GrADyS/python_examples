@@ -31,7 +31,7 @@ class ZigZagMessage:
         destination_id: int = -1,
         next_waypoint_id: int = -1,
         last_waypoint_id: int = -1,
-        data_length: int = 5,
+        data_length: int = 1,
         reversed_flag: bool = False,
         message_type: ZigZagMessageType = ZigZagMessageType.HEARTBEAT,
         source_node_type: ZigZagNodeType = ZigZagNodeType.GROUND,
