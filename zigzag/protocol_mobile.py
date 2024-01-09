@@ -63,7 +63,7 @@ class ZigZagProtocolMobile(IProtocol):
             return
 
         self._send_heartbeat()
-        self.provider.schedule_timer("", self.provider.current_time() + random.random())
+        self.provider.schedule_timer("", self.provider.current_time() + 5)
 
     def handle_packet(self, message: str):
         if not self.mission_started:
