@@ -33,6 +33,8 @@ class ZigZagProtocolMobile(IProtocol):
         self._logger = logging.getLogger()
         self.old_mission_is_reversed: bool = False
 
+        self.mission_started = False
+
     def initialize(self):
         create_statistics(self, file_name_part="")
 
@@ -48,16 +50,25 @@ class ZigZagProtocolMobile(IProtocol):
             self, MissionMobilityConfiguration(loop_mission=LoopMission.REVERSE)
         )
 
-        path = Path(__file__).parent / "mission.txt"
-        self.mission.start_mission_with_waypoint_file(mission_file_path=path)
+        self.provider.schedule_timer("START_MISSION",
+                                     self.provider.current_time() + 60 * self.provider.get_id())
 
         self.provider.schedule_timer("", self.provider.current_time() + random.random())
 
     def handle_timer(self, timer: str):
-        self._send_heartbeat()        
+        if timer == "START_MISSION":
+            path = Path(__file__).parent / "mission.txt"
+            self.mission.start_mission_with_waypoint_file(mission_file_path=path)
+            self.mission_started = True
+            return
+
+        self._send_heartbeat()
         self.provider.schedule_timer("", self.provider.current_time() + random.random())
 
     def handle_packet(self, message: str):
+        if not self.mission_started:
+            return
+
         self._logger.debug("Handling packet in mobile protocol")
         message: ZigZagMessage = ZigZagMessage.from_json(message)
 
