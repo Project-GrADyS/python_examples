@@ -9,7 +9,7 @@ from protocol_sensor import ZigZagProtocolSensor
 
 
 def run_simulation(real_time: bool):
-    builder = SimulationBuilder(SimulationConfiguration(duration=200, debug=True, real_time=real_time))
+    builder = SimulationBuilder(SimulationConfiguration(duration=20000, debug=True, real_time=False))
     builder.add_handler(CommunicationHandler(CommunicationMedium(transmission_range=50)))
     builder.add_handler(TimerHandler())
     builder.add_handler(MobilityHandler())
