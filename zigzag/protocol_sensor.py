@@ -1,11 +1,12 @@
 import logging
+import os
 from gradysim.protocol.plugin.statistics import create_statistics, finish_statistics
 from gradysim.protocol.messages.communication import (
     SendMessageCommand,
 )
 from gradysim.protocol.messages.telemetry import Telemetry
 from gradysim.protocol.interface import IProtocol
-from message import ZigZagMessage, ZigZagMessageType
+from message import ZigZagMessage, ZigZagMessageType, ZigZagNodeType
 from utils import CommunicationStatus
 
 
@@ -15,6 +16,20 @@ class ZigZagProtocolSensor(IProtocol):
         self.tentative_target: int = -1
 
         self._logger = logging.getLogger()
+
+        self.folder_prefix = "/home/lac/Documents/Gradys/examples/results/cpp/15/"
+        folder_count = 10
+
+        def is_folder_empty(folder_path):
+            return len(os.listdir(folder_path)) == 0
+
+        for i in range(1, folder_count + 1):
+            folder_path = f"{self.folder_prefix}{i}"
+
+            if is_folder_empty(folder_path):
+                self.current_run_id = i
+                break
+
 
 
     def initialize(self):
@@ -38,6 +53,7 @@ class ZigZagProtocolSensor(IProtocol):
                 message_type=ZigZagMessageType.BEARER,
                 source_id=self.provider.get_id(),
                 destination_id=self.tentative_target,
+                source_node_type=ZigZagNodeType.SENSOR
             )
             
             self.provider.send_communication_command(
@@ -53,4 +69,4 @@ class ZigZagProtocolSensor(IProtocol):
         pass
 
     def finish(self):
-        finish_statistics(self)
+        finish_statistics(self, f'{self.folder_prefix}{self.current_run_id}')

@@ -9,6 +9,11 @@ class ZigZagMessageType(int, Enum):
     PAIR_FINISH = 2
     BEARER = 3
 
+class ZigZagNodeType(int, Enum):
+    GROUND = 0
+    MOBILE = 1
+    SENSOR = 2
+
 
 class ZigZagMessage:
     source_id: int
@@ -18,6 +23,7 @@ class ZigZagMessage:
     data_length: int
     reversed_flag: bool
     message_type: ZigZagMessageType
+    source_node_type: ZigZagNodeType
 
     def __init__(
         self,
@@ -25,9 +31,10 @@ class ZigZagMessage:
         destination_id: int = -1,
         next_waypoint_id: int = -1,
         last_waypoint_id: int = -1,
-        data_length: int = 5,
+        data_length: int = 1,
         reversed_flag: bool = False,
         message_type: ZigZagMessageType = ZigZagMessageType.HEARTBEAT,
+        source_node_type: ZigZagNodeType = ZigZagNodeType.GROUND,
     ) -> None:
         self.source_id = source_id
         self.destination_id = destination_id
@@ -36,6 +43,7 @@ class ZigZagMessage:
         self.data_length = data_length
         self.reversed_flag = reversed_flag
         self.message_type = message_type
+        self.source_node_type = source_node_type
 
     def to_json(self):
         return json.dumps(self.__dict__)

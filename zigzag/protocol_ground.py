@@ -11,12 +11,11 @@ from gradysim.protocol.plugin.statistics import create_statistics, finish_statis
 from gradysim.protocol.messages.communication import BroadcastMessageCommand, SendMessageCommand
 from gradysim.protocol.messages.telemetry import Telemetry
 from gradysim.protocol.interface import IProtocol
-from message import ZigZagMessage, ZigZagMessageType, ZigZagNodeType
+from message import ZigZagMessage, ZigZagMessageType
 from utils import CommunicationStatus
 
-delays = 0
 
-class ZigZagProtocolMobile(IProtocol):
+class ZigZagProtocolGround(IProtocol):
     def __init__(self):
         self.timeout_end: int = 0
         self.timeout_set: bool = False
@@ -29,13 +28,11 @@ class ZigZagProtocolMobile(IProtocol):
         self.current_data_load: int = 0
         self.stable_data_load: int = self.current_data_load
 
-        self.current_telemetry: Telemetry
-        self.last_stable_telemetry: Telemetry
+        # self.current_telemetry: Telemetry
+        # self.last_stable_telemetry: Telemetry
        
         self._logger = logging.getLogger()
         self.old_mission_is_reversed: bool = False
-
-        self.mission_started = False
 
         self.folder_prefix = "/home/lac/Documents/Gradys/examples/results/cpp/15/"
         folder_count = 10
@@ -62,34 +59,13 @@ class ZigZagProtocolMobile(IProtocol):
         # self.provider.tracked_variables["stable_data_load"] = self.current_data_load
         # self.provider.tracked_variables["communication_status"] = self.communication_status.name
 
-        self.mission: MissionMobilityPlugin = MissionMobilityPlugin(
-            self, MissionMobilityConfiguration(loop_mission=LoopMission.REVERSE, speed=10)
-        )
-
-        global delays
-        self.provider.schedule_timer("START_MISSION",
-                                     self.provider.current_time() + delays)
-        
-        delays = delays + 60
-        print(f"ID: {self.provider.get_id()}")
-
-
-        self.provider.schedule_timer("", self.provider.current_time() + 5)
+        self.provider.schedule_timer("", self.provider.current_time() + random.random())
 
     def handle_timer(self, timer: str):
-        if timer == "START_MISSION":
-            path = Path(__file__).parent / "mission.txt"
-            self.mission.start_mission_with_waypoint_file(mission_file_path=path)
-            self.mission_started = True
-            return
-
-        self._send_heartbeat()
-        self.provider.schedule_timer("", self.provider.current_time() + 5)
+        self._send_heartbeat()        
+        self.provider.schedule_timer("", self.provider.current_time() + random.random())
 
     def handle_packet(self, message: str):
-        if not self.mission_started:
-            return
-
         self._logger.debug("Handling packet in mobile protocol")
         message: ZigZagMessage = ZigZagMessage.from_json(message)
 
@@ -97,7 +73,6 @@ class ZigZagProtocolMobile(IProtocol):
             case ZigZagMessageType.HEARTBEAT:
                 if not self._is_timedout():
                     self.tentative_target = message.source_id
-                    self.old_mission_is_reversed = self.mission.is_reversed
                     self._send_message()
 
             case ZigZagMessageType.PAIR_REQUEST:
@@ -107,7 +82,6 @@ class ZigZagProtocolMobile(IProtocol):
                     if self.communication_status != CommunicationStatus.PAIRED:
                         self.tentative_target = message.source_id
                         self.communication_status = CommunicationStatus.PAIRED
-                        self.old_mission_is_reversed = self.mission.is_reversed
                         self._send_message()
 
             case ZigZagMessageType.PAIR_CONFIRM:
@@ -116,60 +90,19 @@ class ZigZagProtocolMobile(IProtocol):
                 else:
                     if message.source_id == self.tentative_target:
                         if self.communication_status != CommunicationStatus.PAIRED_FINISHED:
-                            self._initiate_timeout() 
+                            self._initiate_timeout()
 
-                            self.old_mission_is_reversed = self.mission.is_reversed
-
-                            if message.source_node_type == ZigZagNodeType.GROUND:
-                                self.mission.set_reversed(False)
-                            else:
-                                if not self.mission.is_reversed:
-                                    # Drone flying into mission direction
-                                    if message.reversed_flag:
-                                        # Drone flying in reverse order of mission direction
-                                        reversed = not self.mission.is_reversed
-                                        self.mission.set_reversed(reversed)
-                                    else:
-                                        # Drone flying in mission direction
-                                        if self.provider.get_id() > message.source_id:
-                                            reversed = not self.mission.is_reversed
-                                            self.mission.set_reversed(reversed)
-
-                                else:
-                                    # Drone flying in reverse order of mission direction
-                                    if message.reversed_flag:
-                                        # Drone flying in reverse order of mission direction
-                                        if self.provider.get_id() > message.source_id:
-                                            reversed = not self.mission.is_reversed
-                                            self.mission.set_reversed(reversed)
-
-                                    else:
-                                        # Drone flying in reverse order of mission direction
-                                        reversed = not self.mission.is_reversed
-                                        self.mission.set_reversed(reversed)
-
-                            if self.mission.is_reversed:
-                                self.current_data_load += message.data_length
-                            else:
-                                self.current_data_load = 0
+                            self.stable_data_load += message.data_length
+                            self.current_data_load += message.data_length
                             self.provider.tracked_variables["current_data_load"] = self.current_data_load
 
                             self.communication_status = CommunicationStatus.PAIRED_FINISHED
                             self._send_message()
 
-            case ZigZagMessageType.BEARER:
-                self._logger.debug("Exchanging data in mobile protocol")
-                # Only used to exchange information between drone and sensor
-                self.current_data_load = self.current_data_load + message.data_length
-                self.stable_data_load = self.current_data_load
-                self.provider.tracked_variables["current_data_load"] = self.current_data_load
-                self.provider.tracked_variables["stable_data_load"] = self.stable_data_load
-
     def _send_message(self):
         message = ZigZagMessage(
             source_id=self.provider.get_id(),
             reversed_flag=self.old_mission_is_reversed,
-            source_node_type=ZigZagNodeType.MOBILE
         )
 
         if self.provider.get_id() == self.tentative_target:
@@ -205,20 +138,21 @@ class ZigZagProtocolMobile(IProtocol):
         self.provider.send_communication_command(command)
 
     def handle_telemetry(self, telemetry: Telemetry):
-        self.current_telemetry = telemetry
+        pass
+    #     self.current_telemetry = telemetry
 
-        if self._is_timedout():
-            self.last_stable_telemetry = telemetry
+    #     if self._is_timedout():
+    #         self.last_stable_telemetry = telemetry
 
     def finish(self):
         finish_statistics(self, f'{self.folder_prefix}{self.current_run_id}')
 
+
     def _send_heartbeat(self):
         message = ZigZagMessage(
             source_id=self.provider.get_id(),
-            reversed_flag=self.mission.is_reversed,
-            message_type=ZigZagMessageType.HEARTBEAT,
-            source_node_type=ZigZagNodeType.MOBILE
+            reversed_flag=False,
+            message_type=ZigZagMessageType.HEARTBEAT
         )
 
         self.provider.tracked_variables["communication_status"] = self.communication_status.name
@@ -258,6 +192,6 @@ class ZigZagProtocolMobile(IProtocol):
         self.timeout_set = False
         self.tentative_target = -1
         self.communication_status = CommunicationStatus.FREE
-        self.last_stable_telemetry = self.current_telemetry
+        # self.last_stable_telemetry = self.current_telemetry
         self.stable_data_load = self.current_data_load
         self.provider.tracked_variables["stable_data_load"] = self.stable_data_load
