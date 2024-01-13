@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 from pathlib import Path
 from gradysim.protocol.plugin.mission_mobility import (
@@ -13,6 +14,7 @@ from gradysim.protocol.interface import IProtocol
 from message import ZigZagMessage, ZigZagMessageType, ZigZagNodeType
 from utils import CommunicationStatus
 
+delays = 0
 
 class ZigZagProtocolMobile(IProtocol):
     def __init__(self):
@@ -35,25 +37,44 @@ class ZigZagProtocolMobile(IProtocol):
 
         self.mission_started = False
 
+        self.folder_prefix = "/home/lac/Documents/Gradys/examples/results/cpp/15/"
+        folder_count = 10
+
+        def is_folder_empty(folder_path):
+            return len(os.listdir(folder_path)) == 0
+
+        for i in range(1, folder_count + 1):
+            folder_path = f"{self.folder_prefix}{i}"
+
+            if is_folder_empty(folder_path):
+                self.current_run_id = i
+                break
+
+
     def initialize(self):
         create_statistics(self, file_name_part="")
 
         self._logger.debug("initializing mobile protocol")
 
-        self.provider.tracked_variables["timeout_set"] = self.timeout_set
-        self.provider.tracked_variables["timeout_end"] = self.timeout_end
+        # self.provider.tracked_variables["timeout_set"] = self.timeout_set
+        # self.provider.tracked_variables["timeout_end"] = self.timeout_end
         self.provider.tracked_variables["current_data_load"] = self.current_data_load
-        self.provider.tracked_variables["stable_data_load"] = self.current_data_load
-        self.provider.tracked_variables["communication_status"] = self.communication_status.name
+        # self.provider.tracked_variables["stable_data_load"] = self.current_data_load
+        # self.provider.tracked_variables["communication_status"] = self.communication_status.name
 
         self.mission: MissionMobilityPlugin = MissionMobilityPlugin(
-            self, MissionMobilityConfiguration(loop_mission=LoopMission.REVERSE)
+            self, MissionMobilityConfiguration(loop_mission=LoopMission.REVERSE, speed=10)
         )
 
+        global delays
         self.provider.schedule_timer("START_MISSION",
-                                     self.provider.current_time() + 60 * self.provider.get_id())
+                                     self.provider.current_time() + delays)
+        
+        delays = delays + 60
+        print(f"ID: {self.provider.get_id()}")
 
-        self.provider.schedule_timer("", self.provider.current_time() + random.random())
+
+        self.provider.schedule_timer("", self.provider.current_time() + 5)
 
     def handle_timer(self, timer: str):
         if timer == "START_MISSION":
@@ -190,7 +211,7 @@ class ZigZagProtocolMobile(IProtocol):
             self.last_stable_telemetry = telemetry
 
     def finish(self):
-        finish_statistics(self)
+        finish_statistics(self, f'{self.folder_prefix}{self.current_run_id}')
 
     def _send_heartbeat(self):
         message = ZigZagMessage(

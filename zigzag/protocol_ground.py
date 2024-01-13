@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 from pathlib import Path
 from gradysim.protocol.plugin.mission_mobility import (
@@ -27,22 +28,36 @@ class ZigZagProtocolGround(IProtocol):
         self.current_data_load: int = 0
         self.stable_data_load: int = self.current_data_load
 
-        self.current_telemetry: Telemetry
-        self.last_stable_telemetry: Telemetry
+        # self.current_telemetry: Telemetry
+        # self.last_stable_telemetry: Telemetry
        
         self._logger = logging.getLogger()
         self.old_mission_is_reversed: bool = False
+
+        self.folder_prefix = "/home/lac/Documents/Gradys/examples/results/cpp/15/"
+        folder_count = 10
+
+        def is_folder_empty(folder_path):
+            return len(os.listdir(folder_path)) == 0
+
+        for i in range(1, folder_count + 1):
+            folder_path = f"{self.folder_prefix}{i}"
+
+            if is_folder_empty(folder_path):
+                self.current_run_id = i
+                break
+
 
     def initialize(self):
         create_statistics(self, file_name_part="")
 
         self._logger.debug("initializing mobile protocol")
 
-        self.provider.tracked_variables["timeout_set"] = self.timeout_set
-        self.provider.tracked_variables["timeout_end"] = self.timeout_end
+        # self.provider.tracked_variables["timeout_set"] = self.timeout_set
+        # self.provider.tracked_variables["timeout_end"] = self.timeout_end
         self.provider.tracked_variables["current_data_load"] = self.current_data_load
-        self.provider.tracked_variables["stable_data_load"] = self.current_data_load
-        self.provider.tracked_variables["communication_status"] = self.communication_status.name
+        # self.provider.tracked_variables["stable_data_load"] = self.current_data_load
+        # self.provider.tracked_variables["communication_status"] = self.communication_status.name
 
         self.provider.schedule_timer("", self.provider.current_time() + random.random())
 
@@ -123,13 +138,15 @@ class ZigZagProtocolGround(IProtocol):
         self.provider.send_communication_command(command)
 
     def handle_telemetry(self, telemetry: Telemetry):
-        self.current_telemetry = telemetry
+        pass
+    #     self.current_telemetry = telemetry
 
-        if self._is_timedout():
-            self.last_stable_telemetry = telemetry
+    #     if self._is_timedout():
+    #         self.last_stable_telemetry = telemetry
 
     def finish(self):
-        finish_statistics(self)
+        finish_statistics(self, f'{self.folder_prefix}{self.current_run_id}')
+
 
     def _send_heartbeat(self):
         message = ZigZagMessage(
@@ -175,6 +192,6 @@ class ZigZagProtocolGround(IProtocol):
         self.timeout_set = False
         self.tentative_target = -1
         self.communication_status = CommunicationStatus.FREE
-        self.last_stable_telemetry = self.current_telemetry
+        # self.last_stable_telemetry = self.current_telemetry
         self.stable_data_load = self.current_data_load
         self.provider.tracked_variables["stable_data_load"] = self.stable_data_load
